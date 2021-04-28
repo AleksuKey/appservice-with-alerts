@@ -40,9 +40,9 @@ jobs:
       working-directory: ${{env.workingdirectory}}
 
     - name: Terraform Plan
-      run: terraform plan -var="action_group_id=${{ env.AZURE_ACTION_GROUP_ID }}
+      run: terraform plan -var='action_group_id=${{ env.AZURE_ACTION_GROUP_ID }}'
       working-directory: ${{env.workingdirectory}}
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve -var="action_group_id=${{ env.AZURE_ACTION_GROUP_ID }}
+      run: terraform apply -auto-approve -var='action_group_id=${{ env.AZURE_ACTION_GROUP_ID }}'
       working-directory: ${{env.workingdirectory}}
