@@ -17,6 +17,7 @@ jobs:
       ARM_CLIENT_SECRET: ${{secrets.AZURE_SP_SECRET}}
       ARM_TENANT_ID: ${{secrets.AZURE_TENANT_ID}}
       ARM_SUBSCRIPTION_ID: ${{secrets.AZURE_SP_SUBSCRIPTION_ID}}
+      AZURE_ACTION_GROUP_ID: ${{secrets.AZURE_ACTION_GROUP_ID}}
 
     defaults:
       run:
@@ -27,10 +28,17 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
+    - run: |
+        rpl -R __ARM_CLIENT_ID__ ${{ env.ARM_CLIENT_ID }} .
+        rpl -R __ARM_CLIENT_SECRET__ ${{ env.ARM_CLIENT_SECRET }} .
+        rpl -R __ARM_TENANT_ID__ ${{ env.ARM_TENANT_ID }} .
+        rpl -R __ARM_SUBSCRIPTION_ID__ ${{ env.ARM_SUBSCRIPTION_ID }} .
+        rpl -R __AZURE_ACTION_GROUP_ID__ ${{ env.AZURE_ACTION_GROUP_ID }} .
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
-        terraform_version: 0.14.3
+        terraform_version: 0.12.24
 
     - name: Terraform Init
       run: terraform init
