@@ -28,13 +28,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - run: |
-        find . -name "*.tf" -type f -exec sed -i '' -e 's|__AZURE_ACTION_GROUP_ID__|${{ env.AZURE_ACTION_GROUP_ID }}|g' {} +
-        find . -name "*.tf" -type f -exec sed -i '' -e 's|__ARM_CLIENT_ID__|${{ env.ARM_CLIENT_ID }}|g' {} +
-        find . -name "*.tf" -type f -exec sed -i '' -e 's|__ARM_CLIENT_SECRET__|${{ env.ARM_CLIENT_SECRET }}|g' {} +
-        find . -name "*.tf" -type f -exec sed -i '' -e 's|__ARM_TENANT_ID__|${{ env.ARM_TENANT_ID }}|g' {} +
-        find . -name "*.tf" -type f -exec sed -i '' -e 's|__ARM_SUBSCRIPTION_ID__|${{ env.ARM_SUBSCRIPTION_ID }}|g' {} +
-      name: Replace text
+    - run:  echo ${{ env.ARM_CLIENT_ID }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
