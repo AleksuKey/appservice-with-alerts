@@ -1,0 +1,70 @@
+name: Apply Terraform
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+
+jobs:
+  deployment:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      workingdirectory: "terraform"
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Replace tokens
+      uses: cschleiden/replace-tokens@v1
+      with:
+        tokenPrefix: '{{'
+        tokenSuffix: '}}'
+        files: '["terraform/*.tf"]'
+      env:
+        ARM_CLIENT_ID: ${{secrets.AZURE_SP_CLIENT_ID}}
+        ARM_CLIENT_SECRET: ${{secrets.AZURE_SP_SECRET}}
+        ARM_TENANT_ID: ${{secrets.AZURE_TENANT_ID}}
+        ARM_SUBSCRIPTION_ID: ${{secrets.AZURE_SUBSCRIPTION_ID}}
+        AZURE_ACTION_GROUP_ID: ${{secrets.AZURE_ACTION_GROUP_ID}}
+        AZURE_TFSTATE_KEY: ${{secrets.AZURE_TFSTATE_KEY}}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 0.12.24
+
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ${{env.workingdirectory}}
+
+    - name: Terraform Plan
+      run: terraform plan
+      working-directory: ${{env.workingdirectory}}
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+      working-directory: ${{env.workingdirectory}}
+
+    - name: Az Login
+      run: |
+        az login --service-principal --username ${{secrets.AZURE_SP_CLIENT_ID}} --password ${{secrets.AZURE_SP_SECRET}} --tenant ${{secrets.AZURE_TENANT_ID}}
+        az account set --subscription ${{secrets.AZURE_SUBSCRIPTION_ID}}
+
+    - name: Zip /src
+      uses: papeloto/action-zip@v1
+      with:
+        files: src/NorthwindService/ src/NorthwindService/.deployment
+        dest: result.zip
+
+    - name: AppService code deploy
+      run: |
+        az webapp deployment source config-zip -g testing-rg-tst-we-001 -n testing-app-tst-we-001 --src result.zip
